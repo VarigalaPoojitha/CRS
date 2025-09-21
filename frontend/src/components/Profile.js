@@ -1,34 +1,26 @@
-import React, { useState } from "react";
+// frontend/src/components/Profile.js
+import React, { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 function Profile() {
-  const [profile, setProfile] = useState({
-    name: "Guest User",
-    gender: "Other",
-    address: ""
-  });
+  const { user, logout } = useContext(AuthContext);
 
-  const handleChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
-  };
-
-  const saveProfile = () => {
-    alert("Profile saved: " + JSON.stringify(profile));
-  };
+  if (!user) {
+    return <p>Please log in to view your profile.</p>;
+  }
 
   return (
     <div className="profile-section">
-      <h2>Profile</h2>
-      <label>Name</label>
-      <input type="text" name="name" value={profile.name} onChange={handleChange} />
-      <label>Gender</label>
-      <select name="gender" value={profile.gender} onChange={handleChange}>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-      </select>
-      <label>Address</label>
-      <textarea name="address" value={profile.address} onChange={handleChange} />
-      <button onClick={saveProfile}>Save Profile</button>
+      <h2>My Profile</h2>
+      <p><strong>ID:</strong> {user.id}</p>
+      <p><strong>Name:</strong> {user.name}</p>
+      <p><strong>Role:</strong> {user.role}</p>
+
+      {/* if you later expand backend to return email, gender, address — add them here */}
+
+      <button onClick={logout} style={{ marginTop: "10px" }}>
+        Logout
+      </button>
     </div>
   );
 }

@@ -1,19 +1,41 @@
-import React from "react";
+// frontend/src/components/Cart.js
+import React, { useContext } from "react";
 import api from "./api";
+import { AuthContext } from "../context/AuthContext";
 
 function Cart({ cart, setCart }) {
-  const placeOrder = () => {
-    cart.forEach(item => {
-      api.post("/orders", {
-        costume_id: item.id,
-        customer_id: 1,   // later link with profile
+  const { user, token } = useContext(AuthContext);
+
+  const placeOrder = async () => {
+    if (!user) {
+      alert("Please log in to place an order.");
+      return;
+    }
+
+    try {
+      const items = cart.map(item => ({
+        product_id: item.id,
         quantity: item.quantity || 1,
-        rental_days: 2
-      }).then(() => {
-        console.log("Order placed for:", item.name);
-      }).catch(err => console.error("Error placing order:", err));
-    });
-    setCart([]); // clear cart
+        rental_days: 2,
+        price: item.price, // include price since backend expects price_at_purchase
+      }));
+
+      await api.post(
+        "/orders",
+        { items },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Order placed successfully!");
+      setCart([]); // clear cart
+    } catch (err) {
+      console.error("Error placing order:", err);
+      alert("Failed to place order. Please try again.");
+    }
   };
 
   return (
@@ -27,6 +49,7 @@ function Cart({ cart, setCart }) {
             <div key={item.id} className="cart-item">
               <span>{item.name}</span>
               <span>{item.quantity || 1} pcs</span>
+              <span>₹{item.price}</span>
             </div>
           ))}
           <button onClick={placeOrder}>Place Order</button>
