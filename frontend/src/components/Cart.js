@@ -4,7 +4,7 @@ import api from "./api";
 import { AuthContext } from "../context/AuthContext";
 
 function Cart({ cart, setCart }) {
-  const { user, token } = useContext(AuthContext);
+  const { user } = useContext(AuthContext); // ✅ removed token
 
   const placeOrder = async () => {
     if (!user) {
@@ -17,23 +17,16 @@ function Cart({ cart, setCart }) {
         product_id: item.id,
         quantity: item.quantity || 1,
         rental_days: 2,
-        price: item.price, // include price since backend expects price_at_purchase
+        price: item.price, // backend expects price_at_purchase
       }));
 
-      await api.post(
-        "/orders",
-        { items },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // ✅ no need for headers here, token auto-attached by api.js
+      await api.post("/orders", { items });
 
       alert("Order placed successfully!");
       setCart([]); // clear cart
     } catch (err) {
-      console.error("Error placing order:", err);
+      console.error("Error placing order:", err.response?.data || err.message);
       alert("Failed to place order. Please try again.");
     }
   };
@@ -47,7 +40,7 @@ function Cart({ cart, setCart }) {
         <>
           {cart.map(item => (
             <div key={item.id} className="cart-item">
-              <span>{item.name}</span>
+              <span>{item.title}</span> {/* ✅ correct: backend sends title, not name */}
               <span>{item.quantity || 1} pcs</span>
               <span>₹{item.price}</span>
             </div>

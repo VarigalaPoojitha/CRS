@@ -1,10 +1,12 @@
 // frontend/src/components/Register.js
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import api from "./api";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 function Register() {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const [form, setForm] = useState({
     name: "",
@@ -15,7 +17,6 @@ function Register() {
     role: "customer", // default role
   });
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,12 +25,16 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
     try {
-      await api.post("/auth/register", form);
-      setSuccess("Registration successful! You can now log in.");
-      setTimeout(() => navigate("/login"), 1500);
+      // backend now returns { token, user }
+      const res = await api.post("/auth/register", form);
+
+      // save user + token in context/localStorage
+      login({ user: res.data.user, token: res.data.token });
+
+      // redirect to homepage
+      navigate("/");
     } catch (err) {
       console.error("Registration failed:", err);
       setError("Failed to register. Please try again.");
@@ -41,7 +46,6 @@ function Register() {
       <h2>Register</h2>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green" }}>{success}</p>}
 
       <form onSubmit={handleSubmit}>
         <div>
@@ -79,7 +83,12 @@ function Register() {
 
         <div>
           <label>Gender:</label>
-          <select name="gender" value={form.gender} onChange={handleChange} required>
+          <select
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+            required
+          >
             <option value="">-- Select --</option>
             <option value="male">Male</option>
             <option value="female">Female</option>

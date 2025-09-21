@@ -3,20 +3,34 @@ header {
   margin: 20px 0 30px;
 }
 
-.nav {
+nav {
+  position: sticky;   /* stays at top while scrolling */
+  top: 0;
+  background: #fff;
+  padding: 10px 0;
   text-align: center;
   margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* ensures nav is above other content */
 }
 
-.nav button {
+nav a {
   padding: 8px 14px;
   margin: 5px;
   border-radius: 4px;
   border: none;
   cursor: pointer;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: background 0.3s, color 0.3s;
 }
 
-.nav button.active {
+nav a:hover {
+  background: #f0f0f0;
+}
+
+nav a.active {
   background: #007BFF;
   color: white;
 }
@@ -76,7 +90,9 @@ header {
   justify-content: space-between;
 }
 
-.profile-section input, .profile-section select, .profile-section textarea {
+.profile-section input,
+.profile-section select,
+.profile-section textarea {
   width: 100%;
   margin-bottom: 10px;
 }

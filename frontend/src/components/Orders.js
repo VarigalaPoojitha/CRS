@@ -4,7 +4,7 @@ import api from "./api";
 import { AuthContext } from "../context/AuthContext";
 
 function Orders() {
-  const { user, token } = useContext(AuthContext);
+  const { user } = useContext(AuthContext); // ✅ removed token
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,20 +15,19 @@ function Orders() {
       return;
     }
 
+    // ✅ no manual headers — token added automatically by api.js
     api
-      .get("/orders", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get("/orders")
       .then((res) => {
         setOrders(res.data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Error fetching orders:", err);
+        console.error("Error fetching orders:", err.response?.data || err.message);
         setError("Failed to load orders.");
         setLoading(false);
       });
-  }, [user, token]);
+  }, [user]);
 
   if (!user) {
     return <p>Please log in to view your orders.</p>;

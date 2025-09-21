@@ -1,12 +1,14 @@
+// frontend/src/App.js
 import React, { useContext } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, NavLink } from "react-router-dom"; // ✅ use NavLink
 import Shop from "./components/Shop";
 import Cart from "./components/Cart";
 import Orders from "./components/Orders";
 import Profile from "./components/Profile";
 import SellerDashboard from "./components/SellerDashboard";
 import Login from "./components/Login";
-import Register from "./components/Register";   // ✅ import Register
+import Register from "./components/Register";
+import PrivateRoute from "./components/PrivateRoute";
 import { AuthContext } from "./context/AuthContext";
 import "./styles/App.css";
 
@@ -14,13 +16,23 @@ function App() {
   const { user, logout } = useContext(AuthContext);
 
   return (
-    <Router>
+    <>
       <nav>
-        <Link to="/">Shop</Link>
-        <Link to="/cart">Cart</Link>
-        <Link to="/orders">Orders</Link>
-        <Link to="/profile">Profile</Link>
-        <Link to="/seller">Seller Dashboard</Link>
+        <NavLink to="/" className={({ isActive }) => (isActive ? "active" : "")}>
+          Shop
+        </NavLink>
+        <NavLink to="/cart" className={({ isActive }) => (isActive ? "active" : "")}>
+          Cart
+        </NavLink>
+        <NavLink to="/orders" className={({ isActive }) => (isActive ? "active" : "")}>
+          Orders
+        </NavLink>
+        <NavLink to="/profile" className={({ isActive }) => (isActive ? "active" : "")}>
+          Profile
+        </NavLink>
+        <NavLink to="/seller" className={({ isActive }) => (isActive ? "active" : "")}>
+          Seller Dashboard
+        </NavLink>
 
         {user ? (
           <>
@@ -31,24 +43,63 @@ function App() {
           </>
         ) : (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/register" style={{ marginLeft: "10px" }}>
+            <NavLink to="/login" className={({ isActive }) => (isActive ? "active" : "")}>
+              Login
+            </NavLink>
+            <NavLink
+              to="/register"
+              className={({ isActive }) => (isActive ? "active" : "")}
+              style={{ marginLeft: "10px" }}
+            >
               Register
-            </Link>
+            </NavLink>
           </>
         )}
       </nav>
 
       <Routes>
+        {/* Public */}
         <Route path="/" element={<Shop />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/seller" element={<SellerDashboard />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />  {/* ✅ register route */}
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected */}
+        <Route
+          path="/cart"
+          element={
+            <PrivateRoute>
+              <Cart />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <PrivateRoute>
+              <Orders />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Role-based */}
+        <Route
+          path="/seller"
+          element={
+            <PrivateRoute requiredRole="seller">
+              <SellerDashboard />
+            </PrivateRoute>
+          }
+        />
       </Routes>
-    </Router>
+    </>
   );
 }
 
